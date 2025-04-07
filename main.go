@@ -1,8 +1,5 @@
 package main
 
-// An example Bubble Tea server. This will put an ssh session into alt screen
-// and continually print up to date terminal information.
-
 import (
 	"context"
 	"errors"
@@ -19,7 +16,6 @@ import (
 	"github.com/charmbracelet/wish/activeterm"
 	"github.com/charmbracelet/wish/bubbletea"
 	"github.com/charmbracelet/wish/logging"
-	"github.com/joho/godotenv"
 
 	"github.com/TypeTerminal/Screens"
 )
@@ -32,15 +28,15 @@ const (
 func main() {
 	fmt.Println(host)
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
 		// TODO: put this thing in a .env file or whatever
-		wish.WithHostKeyPath(os.Getenv("SSH_KEY_LOCATION")),
+		wish.WithHostKeyPath(".ssh/id_ed25519"),
 		wish.WithMiddleware(
 			bubbletea.Middleware(screens.StartSpinner),
 			bubbletea.Middleware(screens.TeaHandler),
