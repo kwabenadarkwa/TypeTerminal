@@ -11,7 +11,6 @@ require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/charmbracelet/ssh v0.0.0-20250213143314-8712ec3ff3ef
 	github.com/charmbracelet/wish v1.4.7
-	github.com/joho/godotenv v1.5.1
 )
 
 require (

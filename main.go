@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 	"github.com/charmbracelet/wish/logging"
 
 	"github.com/TypeTerminal/Screens"
+	"github.com/TypeTerminal/Utils"
 )
 
 const (
@@ -27,6 +29,7 @@ const (
 
 func main() {
 	fmt.Println(host)
+	utils.GetAllQuotes(filepath.Join("Data", "testWords.json"))
 
 	// err := godotenv.Load()
 	// if err != nil {
@@ -38,7 +41,6 @@ func main() {
 		// TODO: put this thing in a .env file or whatever
 		wish.WithHostKeyPath(".ssh/id_ed25519"),
 		wish.WithMiddleware(
-			bubbletea.Middleware(screens.StartSpinner),
 			bubbletea.Middleware(screens.TeaHandler),
 			activeterm.Middleware(), // Bubble Tea apps usually require a PTY.
 			logging.Middleware(),
