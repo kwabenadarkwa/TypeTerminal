@@ -14,7 +14,10 @@ This is a type test on the terminal that allows users to practice their typing.
 - [x] Set things up
 - [x] Figure out the high level architecture of shit
 - [x] Create json file for quotes
-- [ ] figure out how to display text on terminal in the center
+- [x] figure out how to display text on terminal 
 - [ ] figure out how to track text as the user types it
 - [ ] figure out how to track text that the user gets wrong
 - [ ] figure out how to track WPM
+
+## UI
+- [ ] figure out how to center things on the terminal

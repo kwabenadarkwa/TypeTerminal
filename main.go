@@ -7,7 +7,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"syscall"
 	"time"
 
@@ -19,7 +18,6 @@ import (
 	"github.com/charmbracelet/wish/logging"
 
 	"github.com/TypeTerminal/Screens"
-	"github.com/TypeTerminal/Utils"
 )
 
 const (
@@ -29,13 +27,13 @@ const (
 
 func main() {
 	fmt.Println(host)
-	quotes := utils.SelectRandomQuoteFromQuotes(
-
-		utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
-	)
-	fmt.Println(quotes.Id)
-	fmt.Println(quotes.Author)
-	fmt.Println(quotes.Quote)
+	// quotes := utils.SelectRandomQuoteFromQuotes(
+	//
+	// 	utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
+	// )
+	// fmt.Println(quotes.Id)
+	// fmt.Println(quotes.Author)
+	// fmt.Println(quotes.Quote)
 
 	// err := godotenv.Load()
 	// if err != nil {
