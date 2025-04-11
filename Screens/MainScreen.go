@@ -1,7 +1,6 @@
 package screens
 
 import (
-	"fmt"
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -41,9 +40,7 @@ func convertQuoteToTrackableType(quote string) []character {
 		// TODO: make this an enum
 		charThing := character{v, "untouched"}
 		arrayThing = append(arrayThing, charThing)
-
 	}
-
 	return arrayThing
 }
 
@@ -58,6 +55,7 @@ type model struct {
 	// TODO: figure out a better name for this section
 	// TODO: there might be more things that are needed in here
 	unmarshalledQuotes []character // items on the to-do list
+	//TODO: this should keep track of the index that the user is currently on 
 }
 
 func (m model) Init() tea.Cmd {
@@ -108,6 +106,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	//TODO: instead of adding the string. add the decontruscted version here so that 
+// you can change the color of the text
 	s := displayQuote.Quote + "\n"
 
 	// // Iterate over our choices
