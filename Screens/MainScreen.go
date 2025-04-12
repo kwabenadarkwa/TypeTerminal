@@ -1,19 +1,25 @@
 package screens
 
 import (
+	"fmt"
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/ssh"
 
 	utils "github.com/TypeTerminal/Utils"
 )
 
-var displayQuote utils.Quote
+var (
+	displayQuote   utils.Quote
+	trackableQuote model
+)
 
 func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	displayQuote = getQuote()
-	return initialModel(), []tea.ProgramOption{tea.WithAltScreen()}
+	trackableQuote = initialModel()
+	return trackableQuote, []tea.ProgramOption{tea.WithAltScreen()}
 }
 
 func initialModel() model {
@@ -30,9 +36,6 @@ func getQuote() utils.Quote {
 		utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
 	)
 }
-
-// func updateShowingQuote() {
-// }
 
 func convertQuoteToTrackableType(quote string) []character {
 	var arrayThing []character
@@ -51,11 +54,12 @@ type character struct {
 	state     string
 }
 
+// state types =  untouched, right, wrong
 type model struct {
 	// TODO: figure out a better name for this section
 	// TODO: there might be more things that are needed in here
 	unmarshalledQuotes []character // items on the to-do list
-	//TODO: this should keep track of the index that the user is currently on 
+	// TODO: this should keep track of the index that the user is currently on
 }
 
 func (m model) Init() tea.Cmd {
@@ -106,9 +110,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	//TODO: instead of adding the string. add the decontruscted version here so that 
-// you can change the color of the text
-	s := displayQuote.Quote + "\n"
+	// TODO: instead of adding the string. add the decontruscted version here so that
+	// you can change the color of the text
+	// s := displayQuote.Quote + "\n"
+	// goodStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
+	// badStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	untouchedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("0"))
+
+	s := ""
+	for _, v := range trackableQuote.unmarshalledQuotes {
+		//TODO: do an if statement to check that state before setting the style
+		s += fmt.Sprint(untouchedStyle.Render(string(v.character)))
+	}
 
 	// // Iterate over our choices
 	// for i, choice := range m.choices {
