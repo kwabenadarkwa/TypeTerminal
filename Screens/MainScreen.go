@@ -66,60 +66,30 @@ type character struct {
 }
 
 type model struct {
-	// TODO: figure out a better name for this section
-	// TODO: there might be more things that are needed in here
 	unmarshalledQuotes []character // items on the to-do list
-	// TODO: this should keep track of the index that the user is currently on
 }
 
 func (m model) Init() tea.Cmd {
 	return nil
 }
 
+var keyStrokeCount int = 0
+
+func incrementKeyStrokes() {
+	keyStrokeCount++
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
+		case string(trackableQuote.unmarshalledQuotes[keyStrokeCount].character):
+			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = right
+		default:
+			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = wrong
 		}
+		incrementKeyStrokes()
 	}
-	// switch msg := msg.(type) {
-	// // Is it a key press?
-	// case tea.KeyMsg:
-
-	//
-	// 	// Cool, what was the actual key pressed?
-	// 	switch msg.String() {
-	//
-	// 	// These keys should exit the program.
-	// 	case "ctrl+c", "q":
-	// 		return m, tea.Quit
-	//
-	// 	// The "up" and "k" keys move the cursor up
-	// 	case "up", "k":
-	// 		if m.cursor > 0 {
-	// 			m.cursor--
-	// 		}
-	//
-	// 	// The "down" and "j" keys move the cursor down
-	// 	case "down", "j":
-	// 		if m.cursor < len(m.choices)-1 {
-	// 			m.cursor++
-	// 		}
-	//
-	// 	// The "enter" key and the spacebar (a literal space) toggle
-	// 	// the selected state for the item that the cursor is pointing at.
-	// 	case "enter", " ":
-	// 		_, ok := m.selected[m.cursor]
-	// 		if ok {
-	// 			delete(m.selected, m.cursor)
-	// 		} else {
-	// 			m.selected[m.cursor] = struct{}{}
-	// 		}
-	// 	}
-	// }
-	//
-	// Return the updated model to the Bubble Tea runtime for processing.
-	// Note that we're not returning a command.
 	return m, nil
 }
 
