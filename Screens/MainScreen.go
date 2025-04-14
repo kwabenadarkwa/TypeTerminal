@@ -11,9 +11,23 @@ import (
 	utils "github.com/TypeTerminal/Utils"
 )
 
+type charState int
+
 var (
 	displayQuote   utils.Quote
 	trackableQuote model
+)
+
+var (
+	rightStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
+	wrongStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+	untouchedStyle lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("0"))
+)
+
+const (
+	right charState = iota
+	wrong
+	untouched
 )
 
 func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
@@ -40,21 +54,17 @@ func getQuote() utils.Quote {
 func convertQuoteToTrackableType(quote string) []character {
 	var arrayThing []character
 	for _, v := range quote {
-		// TODO: make this an enum
-		charThing := character{v, "untouched"}
+		charThing := character{v, untouched}
 		arrayThing = append(arrayThing, charThing)
 	}
 	return arrayThing
 }
 
-// this is what shows whether a particular character has been pressed or not and helps us keep track of each
-// thing and whether it has been pressed or not
 type character struct {
 	character rune
-	state     string
+	state     charState
 }
 
-// state types =  untouched, right, wrong
 type model struct {
 	// TODO: figure out a better name for this section
 	// TODO: there might be more things that are needed in here
@@ -63,11 +73,15 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		}
+	}
 	// switch msg := msg.(type) {
 	// // Is it a key press?
 	// case tea.KeyMsg:
@@ -110,42 +124,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	// TODO: instead of adding the string. add the decontruscted version here so that
-	// you can change the color of the text
-	// s := displayQuote.Quote + "\n"
-	// goodStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
-	// badStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	untouchedStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("0"))
-
 	s := ""
 	for _, v := range trackableQuote.unmarshalledQuotes {
-		//TODO: do an if statement to check that state before setting the style
-		s += fmt.Sprint(untouchedStyle.Render(string(v.character)))
+		switch v.state {
+		case untouched:
+			s += fmt.Sprint(untouchedStyle.Render(string(v.character)))
+		case right:
+			s += fmt.Sprint(rightStyle.Render(string(v.character)))
+		case wrong:
+			s += fmt.Sprint(wrongStyle.Render(string(v.character)))
+		}
 	}
-
-	// // Iterate over our choices
-	// for i, choice := range m.choices {
-	//
-	// 	// Is the cursor pointing at this choice?
-	// 	cursor := " " // no cursor
-	// 	if m.cursor == i {
-	// 		cursor = ">" // cursor!
-	// 	}
-	//
-	// 	// Is this choice selected?
-	// 	checked := " " // not selected
-	// 	if _, ok := m.selected[i]; ok {
-	// 		checked = "x" // selected!
-	// 	}
-	//
-	// 	// Render the row
-	// 	s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
-	// }
-	//
-	// // The footer
-	// s += "\nPress q to quit.\n"
-	//
-	// // Send the UI for rendering
-
 	return s
 }
