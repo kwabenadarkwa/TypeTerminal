@@ -24,7 +24,8 @@ This is a type test on the terminal that allows users to practice their typing.
 - [x] figure out how to track text as the user types it
 - [x] figure out how to track text that the user gets wrong
 - [x] take care of the backspace case
-- [ ] figure out how to track WPM
+- [ ] track WPM
+- [ ] track words that are right 
 
 ## UI
 

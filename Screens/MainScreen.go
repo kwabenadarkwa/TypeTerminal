@@ -106,6 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "backspace":
 			setPrevCharToUntouched()
 			decrementKeyStrokes()
+
 		default:
 			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = wrong
 			incrementKeyStrokes()
