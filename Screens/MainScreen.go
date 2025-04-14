@@ -79,16 +79,40 @@ func incrementKeyStrokes() {
 	keyStrokeCount++
 }
 
+func decrementKeyStrokes() {
+	if keyStrokeCount > 0 {
+		keyStrokeCount--
+	}
+}
+
+func setPrevCharToUntouched() {
+	if keyStrokeCount > 0 {
+		trackableQuote.unmarshalledQuotes[keyStrokeCount-1].state = untouched
+	}
+}
+
+func resetKeyStrokes() {
+	keyStrokeCount = 0
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case string(trackableQuote.unmarshalledQuotes[keyStrokeCount].character):
 			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = right
+			incrementKeyStrokes()
+
+		case "backspace":
+			setPrevCharToUntouched()
+			decrementKeyStrokes()
 		default:
 			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = wrong
+			incrementKeyStrokes()
 		}
-		incrementKeyStrokes()
+		if len(trackableQuote.unmarshalledQuotes) == keyStrokeCount {
+			resetKeyStrokes()
+		}
 	}
 	return m, nil
 }

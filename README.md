@@ -21,8 +21,9 @@ This is a type test on the terminal that allows users to practice their typing.
 - [x] Figure out the high level architecture of shit
 - [x] Create json file for quotes
 - [x] figure out how to display text on terminal
-- [ ] figure out how to track text as the user types it
-- [ ] figure out how to track text that the user gets wrong
+- [x] figure out how to track text as the user types it
+- [x] figure out how to track text that the user gets wrong
+- [x] take care of the backspace case
 - [ ] figure out how to track WPM
 
 ## UI
