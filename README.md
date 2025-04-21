@@ -29,7 +29,6 @@ This is a type test on the terminal that allows users to practice their typing.
 - [ ] figure out how to track WPM
 - [ ] Create a theme package 
     - [ ] Detect user's terminal theme in the beginning 
-- them things
 
 
 ## UI
