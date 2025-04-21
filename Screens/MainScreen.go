@@ -21,7 +21,7 @@ var (
 var (
 	rightStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
 	wrongStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	untouchedStyle lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("0"))
+	untouchedStyle lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
 )
 
 const (
