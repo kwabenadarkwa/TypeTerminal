@@ -29,7 +29,7 @@ This is a type test on the terminal that allows users to practice their typing.
 - [ ] figure out how to track WPM
 - [ ] Create a theme package 
     - [ ] Detect user's terminal theme in the beginning 
-
+- First here
 ## UI
 
 - [ ] figure out how to center things on the terminal
@@ -39,4 +39,4 @@ This is a type test on the terminal that allows users to practice their typing.
 - [x] change the things that are supposed to be enums to enums
 - [ ] check on renaming of something that don't make sense
 - [ ] Create a large model to house all other models (Reference our lord and saviour Primeagen)
-
+ 
