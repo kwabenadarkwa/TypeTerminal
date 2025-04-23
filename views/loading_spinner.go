@@ -1,4 +1,4 @@
-package screens
+package views 
 
 import (
 	"fmt"

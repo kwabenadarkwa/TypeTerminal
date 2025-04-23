@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"os"
 	"os/signal"
@@ -17,7 +16,7 @@ import (
 	"github.com/charmbracelet/wish/bubbletea"
 	"github.com/charmbracelet/wish/logging"
 
-	"github.com/TypeTerminal/Screens"
+	"github.com/TypeTerminal/views"
 )
 
 const (
@@ -26,26 +25,12 @@ const (
 )
 
 func main() {
-	fmt.Println(host)
-	// quotes := utils.SelectRandomQuoteFromQuotes(
-	//
-	// 	utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
-	// )
-	// fmt.Println(quotes.Id)
-	// fmt.Println(quotes.Author)
-	// fmt.Println(quotes.Quote)
-
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
-
 	s, err := wish.NewServer(
 		wish.WithAddress(net.JoinHostPort(host, port)),
 		// TODO: put this thing in a .env file or whatever
 		wish.WithHostKeyPath(".ssh/id_ed25519"),
 		wish.WithMiddleware(
-			bubbletea.Middleware(screens.TeaHandler),
+			bubbletea.Middleware(views.TeaHandler),
 			activeterm.Middleware(), // Bubble Tea apps usually require a PTY.
 			logging.Middleware(),
 		),

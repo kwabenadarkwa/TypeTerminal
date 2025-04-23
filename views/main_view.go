@@ -1,14 +1,14 @@
-package screens
+package views
 
 import (
 	"fmt"
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/ssh"
 
-	utils "github.com/TypeTerminal/Utils"
+	"github.com/TypeTerminal/theme"
+	"github.com/TypeTerminal/utils"
 )
 
 type charState int
@@ -16,12 +16,6 @@ type charState int
 var (
 	displayQuote   utils.Quote
 	trackableQuote model
-)
-
-var (
-	rightStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#FFFFFF"))
-	wrongStyle     lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	untouchedStyle lipgloss.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
 )
 
 const (
@@ -119,15 +113,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	style := theme.CreateCharColorConfig()
 	s := ""
 	for _, v := range trackableQuote.unmarshalledQuotes {
 		switch v.state {
 		case untouched:
-			s += fmt.Sprint(untouchedStyle.Render(string(v.character)))
+			s += fmt.Sprint(style.UntouchedStyle.Render(string(v.character)))
 		case right:
-			s += fmt.Sprint(rightStyle.Render(string(v.character)))
+			s += fmt.Sprint(style.RightStyle.Render(string(v.character)))
 		case wrong:
-			s += fmt.Sprint(wrongStyle.Render(string(v.character)))
+			s += fmt.Sprint(style.WrongStyle.Render(string(v.character)))
 		}
 	}
 	return s
