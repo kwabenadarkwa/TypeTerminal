@@ -27,6 +27,7 @@ It is built using Charm library things and it is based on the [Elm Architecture]
 - [x] take care of the backspace case
 - [x] track words that are right
 - [ ] figure out how to track WPM
+- [ ] figure out how to track the words that the user typed in right
 - [ ] Create a theme package
   - [x] Detect user's terminal theme in the beginning
   - [ ] create a component for creating borders around things in the theme file
