@@ -38,6 +38,7 @@ type model struct {
 	wordCount         int
 	wpm               int
 	wpmTracked        bool
+	typingDone        bool
 	startTime         time.Time
 	endTime           time.Time
 }
@@ -55,6 +56,7 @@ func initialModel() model {
 		wordCount:         getWordCount(displayQuote.Quote),
 		wpm:               0,
 		wpmTracked:        false,
+		typingDone:        false,
 	}
 	return modelReturn
 }
@@ -106,11 +108,25 @@ func resetKeyStrokes() {
 
 func (m model) setWPM() {
 	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
-	log.Println("This is the elapsed time", elapsedTime)
-	// this is the naive words per minute not accounting for the fact that some of the words were wrong
-	log.Println("Total word count", m.wordCount)
-	m.wpm = int((m.wordCount * 60) / int(elapsedTime))
-	log.Println("This is the wpm", m.wpm)
+	log.Println("elapsed time", elapsedTime)
+
+	var wrongCount int
+	var charCount int
+	for _, char := range m.unmarshalledQuote {
+		charCount++
+		if char.state == wrong {
+			wrongCount++
+		}
+	}
+
+	wpmWithoutMistakes := int((m.wordCount * 60) / int(elapsedTime))
+	log.Println("Wrong Count", wrongCount)
+	wrongCharPercentage := float64(wrongCount) / float64(charCount)
+	log.Println("WPM regularly without mistakes", wpmWithoutMistakes)
+	log.Println("Percentage of mistakes", wrongCharPercentage)
+	log.Println("difference with one", 1-wrongCharPercentage)
+	m.wpm = int(float64(wpmWithoutMistakes) * (float64(1) - wrongCharPercentage))
+	log.Println("Regular WPM with mistakes", m.wpm)
 }
 
 func (m model) Init() tea.Cmd {
@@ -123,32 +139,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.wpmTracked = true
 	}
 
+	if len(m.unmarshalledQuote) != keyStrokeCount {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case string(m.unmarshalledQuote[keyStrokeCount].character):
+				m.unmarshalledQuote[keyStrokeCount].state = right
+				incrementKeyStrokes()
+
+			case "backspace":
+				setPrevCharToUntouched()
+				decrementKeyStrokes()
+
+			default:
+				m.unmarshalledQuote[keyStrokeCount].state = wrong
+				incrementKeyStrokes()
+			}
+		}
+	}
+
 	if len(m.unmarshalledQuote) == keyStrokeCount {
-		m.endTime = time.Now()
-		m.setWPM()
+		// doesn't recalculate when backspace is pressed
+		if !m.typingDone {
+			m.endTime = time.Now()
+			m.setWPM()
+			m.typingDone = true
+		}
 		if keyMsg, ok := msg.(tea.KeyMsg); ok {
 			if keyMsg.String() == "backspace" {
 				setPrevCharToUntouched()
 				decrementKeyStrokes()
 			}
-		}
-		return m, nil
-	}
-
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case string(m.unmarshalledQuote[keyStrokeCount].character):
-			m.unmarshalledQuote[keyStrokeCount].state = right
-			incrementKeyStrokes()
-
-		case "backspace":
-			setPrevCharToUntouched()
-			decrementKeyStrokes()
-
-		default:
-			m.unmarshalledQuote[keyStrokeCount].state = wrong
-			incrementKeyStrokes()
 		}
 	}
 
@@ -156,6 +177,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	// add a section here that represents the header and then the footer also
 	style := theme.CreateCharColorConfig()
 	s := ""
 	for _, v := range m.unmarshalledQuote {
