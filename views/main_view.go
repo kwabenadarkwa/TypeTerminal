@@ -34,6 +34,7 @@ type model struct {
 }
 
 func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	resetKeyStrokes()
 	displayQuote = getQuote()
 	trackableQuote = initialModel()
 	return trackableQuote, []tea.ProgramOption{tea.WithAltScreen()}
@@ -63,7 +64,10 @@ func convertQuoteToTrackableType(quote string) []character {
 var keyStrokeCount int = 0
 
 func incrementKeyStrokes() {
-	keyStrokeCount++
+	wordLen := len(trackableQuote.unmarshalledQuotes)
+	if keyStrokeCount < wordLen {
+		keyStrokeCount++
+	}
 }
 
 func decrementKeyStrokes() {
@@ -87,6 +91,19 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if len(trackableQuote.unmarshalledQuotes) == keyStrokeCount {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "backspace":
+				setPrevCharToUntouched()
+				decrementKeyStrokes()
+			}
+		}
+
+		return m, nil
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -102,10 +119,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			trackableQuote.unmarshalledQuotes[keyStrokeCount].state = wrong
 			incrementKeyStrokes()
 		}
-		if len(trackableQuote.unmarshalledQuotes) == keyStrokeCount {
-			resetKeyStrokes()
-		}
 	}
+
 	return m, nil
 }
 
