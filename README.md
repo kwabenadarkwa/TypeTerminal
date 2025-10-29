@@ -1,6 +1,7 @@
 # TypeTerminal
 
 This is a type test on the terminal that allows users to practice their typing.
+It is built using Charm library things and it is based on the [Elm Architecture](https://guide.elm-lang.org/architecture/). This basically uses a _Model_, _View_ and _Update_
 
 ## Tools Used
 
@@ -24,15 +25,12 @@ This is a type test on the terminal that allows users to practice their typing.
 - [x] figure out how to track text as the user types it
 - [x] figure out how to track text that the user gets wrong
 - [x] take care of the backspace case
-- [ ] track WPM
-- [ ] track words that are right 
+- [x] track words that are right
 - [ ] figure out how to track WPM
-- [ ] Create a theme package 
-    - [ ] Detect user's terminal theme in the beginning 
+- [ ] Create a theme package
+  - [x] Detect user's terminal theme in the beginning
+  - [ ] create a component for creating borders around things in the theme file
 - [ ] things
-
-
-
 
 ## UI
 
@@ -42,5 +40,5 @@ This is a type test on the terminal that allows users to practice their typing.
 
 - [x] change the things that are supposed to be enums to enums
 - [ ] check on renaming of something that don't make sense
-- [ ] Create a large model to house all other models (Reference our lord and saviour Primeagen)
-
+- [ ] remove some of the functions that only call other functions
+- [ ] Create a large model to house all other models

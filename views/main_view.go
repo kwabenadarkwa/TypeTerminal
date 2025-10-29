@@ -11,8 +11,6 @@ import (
 	"github.com/TypeTerminal/utils"
 )
 
-type charState int
-
 var (
 	displayQuote   utils.Quote
 	trackableQuote model
@@ -24,35 +22,7 @@ const (
 	untouched
 )
 
-func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	displayQuote = getQuote()
-	trackableQuote = initialModel()
-	return trackableQuote, []tea.ProgramOption{tea.WithAltScreen()}
-}
-
-func initialModel() model {
-	modelReturn := model{convertQuoteToTrackableType(displayQuote.Quote)}
-	// for _, v := range modelReturn.unmarshalledQuotes {
-	// 	fmt.Printf("%c %s\n", v.character,v.state)
-	// }
-
-	return modelReturn
-}
-
-func getQuote() utils.Quote {
-	return utils.SelectRandomQuoteFromQuotes(
-		utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
-	)
-}
-
-func convertQuoteToTrackableType(quote string) []character {
-	var arrayThing []character
-	for _, v := range quote {
-		charThing := character{v, untouched}
-		arrayThing = append(arrayThing, charThing)
-	}
-	return arrayThing
-}
+type charState int
 
 type character struct {
 	character rune
@@ -63,8 +33,31 @@ type model struct {
 	unmarshalledQuotes []character // items on the to-do list
 }
 
-func (m model) Init() tea.Cmd {
-	return nil
+func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	displayQuote = getQuote()
+	trackableQuote = initialModel()
+	return trackableQuote, []tea.ProgramOption{tea.WithAltScreen()}
+}
+
+func initialModel() model {
+	modelReturn := model{convertQuoteToTrackableType(displayQuote.Quote)}
+	return modelReturn
+}
+
+func getQuote() utils.Quote {
+	// TODO: refactor: this is a weird way to do things. the function should return the data by default
+	return utils.SelectRandomQuoteFromQuotes(
+		utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
+	)
+}
+
+func convertQuoteToTrackableType(quote string) []character {
+	var charArray []character
+	for _, v := range quote {
+		char := character{v, untouched}
+		charArray = append(charArray, char)
+	}
+	return charArray
 }
 
 var keyStrokeCount int = 0
@@ -87,6 +80,10 @@ func setPrevCharToUntouched() {
 
 func resetKeyStrokes() {
 	keyStrokeCount = 0
+}
+
+func (m model) Init() tea.Cmd {
+	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

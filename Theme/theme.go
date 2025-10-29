@@ -36,3 +36,10 @@ func CreateCharColorConfig() charColorConfig {
 
 	return style
 }
+
+func PutBorderAroundText(str string) lipgloss.Style{
+	//TODO: Make this width dependent on the viewport width
+	return lipgloss.NewStyle().SetString(str).Align(lipgloss.Center).Width(100).Height(30)
+
+}
+
