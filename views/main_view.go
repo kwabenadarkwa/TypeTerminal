@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -33,7 +34,8 @@ type character struct {
 
 // TODO: should probably be an atomic bool to make it thread safe or whatever
 type model struct {
-	unmarshalledQuote []character // items on the to-do list
+	unmarshalledQuote []character
+	wordCount         int
 	wpm               int
 	wpmTracked        bool
 	startTime         time.Time
@@ -49,7 +51,8 @@ func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 func initialModel() model {
 	modelReturn := model{
-		unmarshalledQuote: convertQuoteToTrackableType(displayQuote.Quote),
+		unmarshalledQuote: unmarshallQuoteToChar(displayQuote.Quote),
+		wordCount:         getWordCount(displayQuote.Quote),
 		wpm:               0,
 		wpmTracked:        false,
 	}
@@ -63,7 +66,11 @@ func getQuote() utils.Quote {
 	)
 }
 
-func convertQuoteToTrackableType(quote string) []character {
+func getWordCount(quote string) int {
+	return len(strings.Split(quote, " "))
+}
+
+func unmarshallQuoteToChar(quote string) []character {
 	var charArray []character
 	for _, v := range quote {
 		char := character{v, untouched}
@@ -98,41 +105,41 @@ func resetKeyStrokes() {
 }
 
 func (m model) setWPM() {
-	elapsedTime := m.endTime.Sub(m.startTime)
-	log.Println("This is the elapsed time", elapsedTime.Minutes())
+	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
+	log.Println("This is the elapsed time", elapsedTime)
+	// this is the naive words per minute not accounting for the fact that some of the words were wrong
+	log.Println("Total word count", m.wordCount)
+	m.wpm = int((m.wordCount * 60) / int(elapsedTime))
+	log.Println("This is the wpm", m.wpm)
 }
 
 func (m model) Init() tea.Cmd {
 	return nil
 }
 
-// TODO: something smells wrong here with the way the code is, I should probably consider refactoring it
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if !m.wpmTracked {
 		m.startTime = time.Now()
 		m.wpmTracked = true
 	}
 
-	if len(sessionState.unmarshalledQuote) == keyStrokeCount {
+	if len(m.unmarshalledQuote) == keyStrokeCount {
 		m.endTime = time.Now()
 		m.setWPM()
-		switch msg := msg.(type) {
-		case tea.KeyMsg:
-			switch msg.String() {
-			case "backspace":
+		if keyMsg, ok := msg.(tea.KeyMsg); ok {
+			if keyMsg.String() == "backspace" {
 				setPrevCharToUntouched()
 				decrementKeyStrokes()
 			}
 		}
-
 		return m, nil
 	}
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case string(sessionState.unmarshalledQuote[keyStrokeCount].character):
-			sessionState.unmarshalledQuote[keyStrokeCount].state = right
+		case string(m.unmarshalledQuote[keyStrokeCount].character):
+			m.unmarshalledQuote[keyStrokeCount].state = right
 			incrementKeyStrokes()
 
 		case "backspace":
@@ -140,7 +147,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			decrementKeyStrokes()
 
 		default:
-			sessionState.unmarshalledQuote[keyStrokeCount].state = wrong
+			m.unmarshalledQuote[keyStrokeCount].state = wrong
 			incrementKeyStrokes()
 		}
 	}
@@ -151,7 +158,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	style := theme.CreateCharColorConfig()
 	s := ""
-	for _, v := range sessionState.unmarshalledQuote {
+	for _, v := range m.unmarshalledQuote {
 		switch v.state {
 		case untouched:
 			s += fmt.Sprint(style.UntouchedStyle.Render(string(v.character)))
