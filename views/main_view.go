@@ -8,6 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/ssh"
 
 	"github.com/TypeTerminal/theme"
@@ -36,6 +37,9 @@ type character struct {
 type model struct {
 	unmarshalledQuote []character
 	wordCount         int
+	charLength        int
+	consoleWidth      int
+	consoleHeight     int
 	wpm               int
 	wpmTracked        bool
 	typingDone        bool
@@ -58,6 +62,9 @@ func initialModel() model {
 		wpmTracked:        false,
 		typingDone:        false,
 	}
+	charCount := len(modelReturn.unmarshalledQuote)
+	modelReturn.charLength = charCount
+
 	return modelReturn
 }
 
@@ -106,22 +113,22 @@ func resetKeyStrokes() {
 	keyStrokeCount = 0
 }
 
+// TODO: right now the words taht are right count isn't being used at all
 func (m model) setWPM() {
 	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
 	log.Println("elapsed time", elapsedTime)
 
 	var wrongCount int
-	var charCount int
 	for _, char := range m.unmarshalledQuote {
-		charCount++
 		if char.state == wrong {
 			wrongCount++
 		}
 	}
+	log.Println("this is the total char length", m.charLength)
 
 	wpmWithoutMistakes := int((m.wordCount * 60) / int(elapsedTime))
 	log.Println("Wrong Count", wrongCount)
-	wrongCharPercentage := float64(wrongCount) / float64(charCount)
+	wrongCharPercentage := float64(wrongCount) / float64(m.charLength)
 	log.Println("WPM regularly without mistakes", wpmWithoutMistakes)
 	log.Println("Percentage of mistakes", wrongCharPercentage)
 	log.Println("difference with one", 1-wrongCharPercentage)
@@ -155,29 +162,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.unmarshalledQuote[keyStrokeCount].state = wrong
 				incrementKeyStrokes()
 			}
+		case tea.WindowSizeMsg:
+			m.consoleHeight = msg.Height
+			m.consoleWidth = msg.Width
 		}
 	}
 
 	if len(m.unmarshalledQuote) == keyStrokeCount {
-		// doesn't recalculate when backspace is pressed
+		// INFO: this is done this way currently and that might not be the best decision but I don't recalculate
+		// the typing speed when the user is done and then backspaces because I make the assumption that
+		// they wouldn't necessarily want to redo their entire text
+		// TODO: I should probably think of having a redo feature of some kind
 		if !m.typingDone {
 			m.endTime = time.Now()
 			m.setWPM()
 			m.typingDone = true
 		}
-		if keyMsg, ok := msg.(tea.KeyMsg); ok {
-			if keyMsg.String() == "backspace" {
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "backspace":
 				setPrevCharToUntouched()
 				decrementKeyStrokes()
 			}
+		case tea.WindowSizeMsg:
+			m.consoleHeight = msg.Height
+			m.consoleWidth = msg.Width
 		}
+
 	}
 
 	return m, nil
 }
 
 func (m model) View() string {
-	// add a section here that represents the header and then the footer also
 	style := theme.CreateCharColorConfig()
 	s := ""
 	for _, v := range m.unmarshalledQuote {
@@ -190,5 +208,14 @@ func (m model) View() string {
 			s += fmt.Sprint(style.WrongStyle.Render(string(v.character)))
 		}
 	}
-	return s
+
+	box := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		SetString(s).
+		Width(m.consoleWidth / 2).
+		Height(5).
+		Align(lipgloss.Center).
+		String()
+
+	return lipgloss.Place(m.consoleWidth, m.consoleHeight, lipgloss.Center, lipgloss.Center, box)
 }
