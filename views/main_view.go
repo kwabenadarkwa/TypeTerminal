@@ -198,6 +198,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	style := theme.CreateCharColorConfig()
 	s := ""
+	header := lipgloss.NewStyle().
+		SetString("typeTerm").
+		Align(lipgloss.Center).
+		Border(lipgloss.ASCIIBorder()).
+		Width(m.consoleWidth / 2).
+		String()
+
 	for _, v := range m.unmarshalledQuote {
 		switch v.state {
 		case untouched:
@@ -217,5 +224,13 @@ func (m model) View() string {
 		Align(lipgloss.Center).
 		String()
 
-	return lipgloss.Place(m.consoleWidth, m.consoleHeight, lipgloss.Center, lipgloss.Center, box)
+	stacked := lipgloss.JoinVertical(lipgloss.Center, header, box)
+
+	return lipgloss.Place(
+		m.consoleWidth,
+		m.consoleHeight,
+		lipgloss.Center,
+		lipgloss.Center,
+		stacked,
+	)
 }

@@ -35,7 +35,7 @@ It is built using Charm library things and it is based on the [Elm Architecture]
 
 ## UI
 
-- [ ] figure out how to center things on the terminal
+- [x] figure out how to center things on the terminal
 - [ ] create the header and footer thing that displays things that will be constant
 - [ ] create something that'll display what the wpm is
 
