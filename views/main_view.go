@@ -199,7 +199,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	style := theme.CreateCharColorConfig()
 
-	// typeterm practice stats
 	s := ""
 	applicationName := lipgloss.NewStyle().
 		SetString("typeTerm").
@@ -232,7 +231,7 @@ func (m model) View() string {
 		}
 	}
 
-	box := lipgloss.NewStyle().
+	mainContent := lipgloss.NewStyle().
 		BorderStyle(lipgloss.HiddenBorder()).
 		SetString(s).
 		Width(m.consoleWidth / 2).
@@ -240,13 +239,21 @@ func (m model) View() string {
 		Align(lipgloss.Center).
 		String()
 
-	stacked := lipgloss.JoinVertical(lipgloss.Center, header, box)
+	footer := lipgloss.NewStyle().
+		SetString("tab: new text   ⬅️➡️ : navigation   ctrl+c: quit").
+		BorderStyle(lipgloss.HiddenBorder()).
+		Align(lipgloss.Center).
+		Width(m.consoleWidth / 2).
+		Foreground(lipgloss.Color("#6c7086")).
+		String()
+
+	stackedContent := lipgloss.JoinVertical(lipgloss.Center, header, mainContent, footer)
 
 	return lipgloss.Place(
 		m.consoleWidth,
 		m.consoleHeight,
 		lipgloss.Center,
 		lipgloss.Center,
-		stacked,
+		stackedContent,
 	)
 }
