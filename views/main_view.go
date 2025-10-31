@@ -113,7 +113,6 @@ func resetKeyStrokes() {
 	keyStrokeCount = 0
 }
 
-// TODO: right now the words taht are right count isn't being used at all
 func (m model) setWPM() {
 	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
 	log.Println("elapsed time", elapsedTime)
@@ -210,7 +209,7 @@ func (m model) View() string {
 	// TODO: I need another thing to track which page we are currently on
 	// and I need to separate the things out into their various parts
 	instruction := lipgloss.NewStyle().
-		SetString("practice • stats • settings").
+		SetString("practice • stats").
 		Align(lipgloss.Right).
 		Width(m.consoleWidth / 3).
 		String()

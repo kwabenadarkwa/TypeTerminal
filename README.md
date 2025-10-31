@@ -28,20 +28,17 @@ It is built using Charm library things and it is based on the [Elm Architecture]
 - [x] track words that are right
 - [x] figure out how to track WPM
 - [x] figure out how to track the words that the user typed in right
-- [ ] Create a theme package
+- [x] Create a theme package
   - [x] Detect user's terminal theme in the beginning
-  - [ ] create a component for creating borders around things in the theme file
-- [ ] things
-
-## UI
-
 - [x] figure out how to center things on the terminal
-- [ ] create the header and footer thing that displays things that will be constant
-- [ ] create something that'll display what the wpm is
+- [x] create the header and footer thing that displays things that will be constant
+- [ ] create the screen for WPM and then logic that helps track the WPM
+- [ ] start doing research into how it can actually be hosted and people can use it
+- [ ] fix the ui issues on for when the terminal gets too small that the text is horrible. you should set like some size of the terminal that is minimum and that th euser to increase to to use it
 
 ## Refactoring
 
 - [x] change the things that are supposed to be enums to enums
-- [ ] check on renaming of something that don't make sense
-- [ ] remove some of the functions that only call other functions
-- [ ] Create a large model to house all other models
+- [x] check on renaming of something that don't make sense
+- [x] remove some of the functions that only call other functions
+- [x] Create a large model to house all other models
