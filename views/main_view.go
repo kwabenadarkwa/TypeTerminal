@@ -195,14 +195,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// TODO:  Complete Adaptive Colors use this to define the light and dark theme colors
 func (m model) View() string {
 	style := theme.CreateCharColorConfig()
+
+	// typeterm practice stats
 	s := ""
-	header := lipgloss.NewStyle().
+	applicationName := lipgloss.NewStyle().
 		SetString("typeTerm").
-		Align(lipgloss.Center).
-		Border(lipgloss.ASCIIBorder()).
-		Width(m.consoleWidth / 2).
+		Align(lipgloss.Left).
+		Foreground(lipgloss.Color("#f08c00")).
+		Width(m.consoleWidth / 6).
+		String()
+
+	// TODO: I need another thing to track which page we are currently on
+	// and I need to separate the things out into their various parts
+	instruction := lipgloss.NewStyle().
+		SetString("practice • stats • settings").
+		Align(lipgloss.Right).
+		Width(m.consoleWidth / 3).
+		String()
+
+	header := lipgloss.NewStyle().
+		SetString(lipgloss.JoinHorizontal(lipgloss.Center, applicationName, instruction)).
+		Border(lipgloss.NormalBorder()).
 		String()
 
 	for _, v := range m.unmarshalledQuote {
@@ -217,7 +233,7 @@ func (m model) View() string {
 	}
 
 	box := lipgloss.NewStyle().
-		BorderStyle(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.HiddenBorder()).
 		SetString(s).
 		Width(m.consoleWidth / 2).
 		Height(5).
