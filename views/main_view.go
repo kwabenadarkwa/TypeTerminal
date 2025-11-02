@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -13,11 +14,6 @@ import (
 
 	"github.com/TypeTerminal/theme"
 	"github.com/TypeTerminal/utils"
-)
-
-var (
-	displayQuote utils.Quote
-	sessionState model
 )
 
 const (
@@ -36,6 +32,7 @@ type character struct {
 // TODO: should probably be an atomic bool to make it thread safe or whatever
 type model struct {
 	unmarshalledQuote []character
+	keyStrokeCount    int
 	wordCount         int
 	charLength        int
 	consoleWidth      int
@@ -49,18 +46,23 @@ type model struct {
 }
 
 func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
-	resetKeyStrokes()
-	displayQuote = getQuote()
-	sessionState = initialModel()
-	return sessionState, []tea.ProgramOption{tea.WithAltScreen()}
+	pty, _, _ := s.Pty()
+	height := pty.Window.Height
+	width := pty.Window.Width
+
+	return initialModel(height, width), []tea.ProgramOption{tea.WithAltScreen()}
 }
 
-func initialModel() model {
+func initialModel(height int, width int) model {
+	displayQuote := getQuote()
 	modelReturn := model{
 		unmarshalledQuote: unmarshallQuoteToChar(displayQuote.Quote),
 		wordCount:         getWordCount(displayQuote.Quote),
 		wpm:               0,
+		consoleHeight:     height,
+		consoleWidth:      width,
 		accuracy:          0,
+		keyStrokeCount:    0,
 		wpmTracked:        false,
 		typingDone:        false,
 	}
@@ -90,29 +92,23 @@ func unmarshallQuoteToChar(quote string) []character {
 	return charArray
 }
 
-var keyStrokeCount int = 0
-
-func incrementKeyStrokes() {
-	wordLen := len(sessionState.unmarshalledQuote)
-	if keyStrokeCount < wordLen {
-		keyStrokeCount++
+func (m *model) incrementKeyStrokes() {
+	wordLen := len(m.unmarshalledQuote)
+	if m.keyStrokeCount < wordLen {
+		m.keyStrokeCount++
 	}
 }
 
-func decrementKeyStrokes() {
-	if keyStrokeCount > 0 {
-		keyStrokeCount--
+func (m *model) decrementKeyStrokes() {
+	if m.keyStrokeCount > 0 {
+		m.keyStrokeCount--
 	}
 }
 
-func setPrevCharToUntouched() {
-	if keyStrokeCount > 0 {
-		sessionState.unmarshalledQuote[keyStrokeCount-1].state = untouched
+func (m *model) setPrevCharToUntouched() {
+	if m.keyStrokeCount > 0 {
+		m.unmarshalledQuote[m.keyStrokeCount-1].state = untouched
 	}
-}
-
-func resetKeyStrokes() {
-	keyStrokeCount = 0
 }
 
 func (m *model) setWPM() {
@@ -141,21 +137,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.wpmTracked = true
 	}
 
-	if len(m.unmarshalledQuote) != keyStrokeCount {
+	if len(m.unmarshalledQuote) != m.keyStrokeCount {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
-			case string(m.unmarshalledQuote[keyStrokeCount].character):
-				m.unmarshalledQuote[keyStrokeCount].state = right
-				incrementKeyStrokes()
+			case string(m.unmarshalledQuote[m.keyStrokeCount].character):
+				m.unmarshalledQuote[m.keyStrokeCount].state = right
+				m.incrementKeyStrokes()
 
 			case "backspace":
-				setPrevCharToUntouched()
-				decrementKeyStrokes()
+				m.setPrevCharToUntouched()
+				m.decrementKeyStrokes()
 
+			case "tab":
+				log.Println("tab pressed")
+				height := m.consoleHeight
+				width := m.consoleWidth
+				m = initialModel(height, width)
+				return m, nil
 			default:
-				m.unmarshalledQuote[keyStrokeCount].state = wrong
-				incrementKeyStrokes()
+				m.unmarshalledQuote[m.keyStrokeCount].state = wrong
+				m.incrementKeyStrokes()
 			}
 		case tea.WindowSizeMsg:
 			m.consoleHeight = msg.Height
@@ -163,7 +165,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if len(m.unmarshalledQuote) == keyStrokeCount {
+	if len(m.unmarshalledQuote) == m.keyStrokeCount {
 		// INFO: this is done this way currently and that might not be the best decision but I don't recalculate
 		// the typing speed when the user is done and then backspaces because I make the assumption that
 		// they wouldn't necessarily want to redo their entire text
@@ -178,8 +180,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "backspace":
-				setPrevCharToUntouched()
-				decrementKeyStrokes()
+				m.setPrevCharToUntouched()
+				m.decrementKeyStrokes()
+
+			case "tab":
+				log.Println("tab pressed")
+				height := m.consoleHeight
+				width := m.consoleWidth
+				m = initialModel(height, width)
+				return m, nil
 			}
 		case tea.WindowSizeMsg:
 			m.consoleHeight = msg.Height
@@ -270,7 +279,7 @@ func (m model) View() string {
 
 	return lipgloss.Place(
 		m.consoleWidth,
-		m.consoleHeight,
+		m.consoleHeight-5,
 		lipgloss.Center,
 		lipgloss.Center,
 		stackedContent,
