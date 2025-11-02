@@ -141,6 +141,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
+			case "ctrl+c":
+				log.Println("this is pressed")
+				return m, tea.Quit
+
 			case string(m.unmarshalledQuote[m.keyStrokeCount].character):
 				m.unmarshalledQuote[m.keyStrokeCount].state = right
 				m.incrementKeyStrokes()
@@ -155,6 +159,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				width := m.consoleWidth
 				m = initialModel(height, width)
 				return m, nil
+
 			default:
 				m.unmarshalledQuote[m.keyStrokeCount].state = wrong
 				m.incrementKeyStrokes()
@@ -179,6 +184,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
+			case "ctrl+c":
+				log.Println("this is pressed")
+				return m, tea.Quit
+
 			case "backspace":
 				m.setPrevCharToUntouched()
 				m.decrementKeyStrokes()
