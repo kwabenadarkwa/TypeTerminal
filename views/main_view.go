@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -118,7 +117,6 @@ func resetKeyStrokes() {
 
 func (m *model) setWPM() {
 	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
-	log.Println("elapsed time", elapsedTime)
 
 	var wrongCount int
 	for _, char := range m.unmarshalledQuote {
@@ -126,18 +124,11 @@ func (m *model) setWPM() {
 			wrongCount++
 		}
 	}
-	log.Println("this is the total char length", m.charLength)
 
 	wpmWithoutMistakes := int((m.wordCount * 60) / int(elapsedTime))
-	log.Println("Wrong Count", wrongCount)
 	wrongCharPercentage := float64(wrongCount) / float64(m.charLength)
-	log.Println("WPM regularly without mistakes", wpmWithoutMistakes)
-	log.Println("Percentage of mistakes", wrongCharPercentage)
-	log.Println("difference with one", 1-wrongCharPercentage)
 	m.accuracy = int((float64(1) - wrongCharPercentage) * 100)
 	m.wpm = int(float64(wpmWithoutMistakes) * (float64(1) - wrongCharPercentage))
-	log.Println("Actual WPM with mistakes", m.wpm)
-	log.Println("This is the accuracy", m.accuracy)
 }
 
 func (m model) Init() tea.Cmd {
@@ -227,7 +218,7 @@ func (m model) View() string {
 
 	wpm := lipgloss.NewStyle().
 		SetString("WPM: ", strconv.Itoa(m.wpm)).
-		Width(m.consoleWidth/10).
+		Width(m.consoleWidth / 10).
 		Align(lipgloss.Left).
 		String()
 
