@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,6 +43,7 @@ type model struct {
 	consoleHeight     int
 	wpm               int
 	wpmTracked        bool
+	accuracy          int
 	typingDone        bool
 	startTime         time.Time
 	endTime           time.Time
@@ -59,6 +61,7 @@ func initialModel() model {
 		unmarshalledQuote: unmarshallQuoteToChar(displayQuote.Quote),
 		wordCount:         getWordCount(displayQuote.Quote),
 		wpm:               0,
+		accuracy:          0,
 		wpmTracked:        false,
 		typingDone:        false,
 	}
@@ -113,7 +116,7 @@ func resetKeyStrokes() {
 	keyStrokeCount = 0
 }
 
-func (m model) setWPM() {
+func (m *model) setWPM() {
 	elapsedTime := m.endTime.Sub(m.startTime).Seconds()
 	log.Println("elapsed time", elapsedTime)
 
@@ -131,8 +134,10 @@ func (m model) setWPM() {
 	log.Println("WPM regularly without mistakes", wpmWithoutMistakes)
 	log.Println("Percentage of mistakes", wrongCharPercentage)
 	log.Println("difference with one", 1-wrongCharPercentage)
+	m.accuracy = int((float64(1) - wrongCharPercentage) * 100)
 	m.wpm = int(float64(wpmWithoutMistakes) * (float64(1) - wrongCharPercentage))
-	log.Println("Regular WPM with mistakes", m.wpm)
+	log.Println("Actual WPM with mistakes", m.wpm)
+	log.Println("This is the accuracy", m.accuracy)
 }
 
 func (m model) Init() tea.Cmd {
@@ -177,6 +182,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.setWPM()
 			m.typingDone = true
 		}
+
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 			switch msg.String() {
@@ -219,6 +225,23 @@ func (m model) View() string {
 		Border(lipgloss.NormalBorder()).
 		String()
 
+	wpm := lipgloss.NewStyle().
+		SetString("WPM: ", strconv.Itoa(m.wpm)).
+		Width(m.consoleWidth/10).
+		Align(lipgloss.Left).
+		String()
+
+	accuracy := lipgloss.NewStyle().
+		Width(m.consoleWidth/7).
+		SetString("Accuracy: ", strconv.Itoa(m.accuracy), "%").
+		Align(lipgloss.Right).String()
+
+	currentStats := lipgloss.NewStyle().
+		SetString(lipgloss.JoinHorizontal(lipgloss.Center, wpm, accuracy)).
+		Width(m.consoleWidth / 4).
+		Border(lipgloss.HiddenBorder()).
+		String()
+
 	for _, v := range m.unmarshalledQuote {
 		switch v.state {
 		case untouched:
@@ -246,7 +269,13 @@ func (m model) View() string {
 		Foreground(lipgloss.Color("#6c7086")).
 		String()
 
-	stackedContent := lipgloss.JoinVertical(lipgloss.Center, header, mainContent, footer)
+	stackedContent := lipgloss.JoinVertical(
+		lipgloss.Center,
+		header,
+		currentStats,
+		mainContent,
+		footer,
+	)
 
 	return lipgloss.Place(
 		m.consoleWidth,
