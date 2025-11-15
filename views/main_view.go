@@ -3,7 +3,6 @@ package views
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -56,8 +55,8 @@ func TeaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 func initialModel(height int, width int) model {
 	displayQuote := getQuote()
 	modelReturn := model{
-		unmarshalledQuote: unmarshallQuoteToChar(displayQuote.Quote),
-		wordCount:         getWordCount(displayQuote.Quote),
+		unmarshalledQuote: unmarshallQuoteToChar(displayQuote.Content),
+		wordCount:         getWordCount(displayQuote.Content),
 		wpm:               0,
 		consoleHeight:     height,
 		consoleWidth:      width,
@@ -72,11 +71,12 @@ func initialModel(height int, width int) model {
 	return modelReturn
 }
 
-// TODO: this quote getting would be replaced by some API
 func getQuote() utils.Quote {
-	return utils.SelectRandomQuoteFromQuotes(
-		utils.GetAllQuotes(filepath.Join("Data", "testWords.json")),
-	)
+	quote, err := utils.GetRandomQuote()
+	if err != nil {
+		return utils.Quote{Content: "error"}
+	}
+	return *quote
 }
 
 func getWordCount(quote string) int {
@@ -142,7 +142,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "ctrl+c":
-				log.Println("this is pressed")
 				return m, tea.Quit
 
 			case string(m.unmarshalledQuote[m.keyStrokeCount].character):
@@ -154,7 +153,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.decrementKeyStrokes()
 
 			case "tab":
-				log.Println("tab pressed")
+				// log.Println("tab pressed")
 				height := m.consoleHeight
 				width := m.consoleWidth
 				m = initialModel(height, width)
@@ -185,7 +184,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyMsg:
 			switch msg.String() {
 			case "ctrl+c":
-				log.Println("this is pressed")
 				return m, tea.Quit
 
 			case "backspace":
